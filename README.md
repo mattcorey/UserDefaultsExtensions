@@ -15,6 +15,8 @@ This package includes an extension to the standard Published property wrapper to
 ### Usage
 
 ``` Swift
+import UserDefaultsExtensions
+
 class SomeSettings: ObservableObject {
     //This property will not be saved, but will behave like a normal @Published property
     @Published
