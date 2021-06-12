@@ -92,16 +92,16 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         
         XCTAssertEqual(properties.intSample, 84)
         XCTAssertEqual(properties.stringSample, "Am I still a String?")
-        XCTAssertEqual(properties.intArraySample, [ 1, 2, 3, 4, 5, 100, 99, 98, 97, 96, 95 ])
-        XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2), SimpleStruct(name: "Hello", age: 8) ])
-        XCTAssertEqual(properties.dictionarySample, [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2), 11: SimpleStruct(name: "Eleven", age: 11) ])
+        XCTAssertEqual(properties.intArraySample, [ 6, 7, 8, 9, 100, 99, 98, 97, 96, 95 ])
+        XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4), SimpleStruct(name: "Hello", age: 8) ])
+        XCTAssertEqual(properties.dictionarySample, [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4), 11: SimpleStruct(name: "Eleven", age: 11) ])
         
         //Verify that it's been populated
         XCTAssertEqual(defaults.integer(forKey: "test-int"), 84)
         XCTAssertEqual(defaults.string(forKey: "test-string"), "Am I still a String?")
-        validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 1, 2, 3, 4, 5, 100, 99, 98, 97, 96, 95 ])
-        validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2), SimpleStruct(name: "Hello", age: 8) ])
-        validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2), 11: SimpleStruct(name: "Eleven", age: 11) ])
+        validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 6, 7, 8, 9, 100, 99, 98, 97, 96, 95 ])
+        validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4), SimpleStruct(name: "Hello", age: 8) ])
+        validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4), 11: SimpleStruct(name: "Eleven", age: 11) ])
     }
 
     fileprivate func validateFromType<T>(key: String, ofType type: T.Type, expectedValue: T) where T: Codable & Equatable {

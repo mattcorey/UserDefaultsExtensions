@@ -1,3 +1,5 @@
+![project status](https://github.com/mattcorey/UserDefaultsExtensions/actions/workflows/swift.yml/badge.svg)
+
 # UserDefaultsExtensions
 
 Utility classes to help easily work with UserDefaults
