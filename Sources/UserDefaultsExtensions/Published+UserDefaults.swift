@@ -60,10 +60,15 @@ public extension Published {
         self.init(initialValue: value)
         cancellables[key] = projectedValue.sink { val in
             let newVal = val as! Optional<T>
-            if newVal == nil {
+
+            var done = false
+            newVal.map { wrappedVal in
+                UserDefaults.standard.set(wrappedVal, forKey: key)
+                done = true
+            }
+
+            if !done {
                 UserDefaults.standard.removeObject(forKey: key)
-            } else {
-                UserDefaults.standard.set(val, forKey: key)
             }
         }
     }
