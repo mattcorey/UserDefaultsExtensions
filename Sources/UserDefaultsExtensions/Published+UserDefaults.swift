@@ -52,23 +52,27 @@ public extension Published {
         var value: Value = defaultValue as! Value
         //swiftlint:enable force_cast
 
-        if let tempVal = UserDefaults.standard.object(forKey: key),
-           let tempValue = tempVal as? Value {
+//        if let tempVal = UserDefaults.standard.object(forKey: key),
+//           let tempValue = tempVal as? Value {
+//            value = tempValue
+//        }
+
+        if let tempData = UserDefaults.standard.data(forKey: key),
+            let tempObject = try? JSONDecoder().decode(type, from: tempData),
+            let tempValue = tempObject as? Value {
+
             value = tempValue
         }
-
         self.init(initialValue: value)
         cancellables[key] = projectedValue.sink { val in
             let newVal = val as! Optional<T>
 
-            var done = false
-            newVal.map { wrappedVal in
-                UserDefaults.standard.set(wrappedVal, forKey: key)
-                done = true
-            }
-
-            if !done {
+            if newVal == nil {
                 UserDefaults.standard.removeObject(forKey: key)
+            } else {
+                if let coded = try? JSONEncoder().encode(val as? T) {
+                    UserDefaults.standard.set(coded, forKey: key)
+                }
             }
         }
     }
