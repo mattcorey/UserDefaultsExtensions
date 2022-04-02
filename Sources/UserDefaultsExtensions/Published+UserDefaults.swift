@@ -46,4 +46,26 @@ public extension Published {
             }
         }
     }
+
+    init<T>(wrappedValue defaultValue: Optional<T>, key: String, ofOptionalType type: T.Type) where T: Codable {
+        //swiftlint:disable force_cast
+        var value: Value = defaultValue as! Value
+        //swiftlint:enable force_cast
+
+        if let tempVal = UserDefaults.standard.object(forKey: key),
+           let tempValue = tempVal as? Value {
+            value = tempValue
+        }
+
+        self.init(initialValue: value)
+        cancellables[key] = projectedValue.sink { val in
+            let newVal = val as! Optional<T>
+            if newVal == nil {
+                UserDefaults.standard.removeObject(forKey: key)
+            } else {
+                UserDefaults.standard.set(val, forKey: key)
+            }
+        }
+    }
+
 }

@@ -10,6 +10,7 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         defaults.removeObject(forKey: "test-int-array")
         defaults.removeObject(forKey: "test-struct-array")
         defaults.removeObject(forKey: "test-dictionary")
+        defaults.removeObject(forKey: "test-nullable-string")
     }
     
     func testPublishedAnnotation_fromClean() {
@@ -23,6 +24,7 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         XCTAssertNil(defaults.array(forKey: "test-int-array"))
         XCTAssertNil(defaults.array(forKey: "test-struct-array"))
         XCTAssertNil(defaults.array(forKey: "test-dictionary"))
+        XCTAssertNil(defaults.array(forKey: "test-nullable-string"))
 
         let properties = SimpleExample()
         XCTAssertEqual(properties.intSample, 42)
@@ -30,13 +32,15 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         XCTAssertEqual(properties.intArraySample, [ 1, 2, 3, 4, 5 ])
         XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2) ])
         XCTAssertEqual(properties.dictionarySample, [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2) ])
-        
+        XCTAssertNil(properties.nullableStringSample)
+
         //Verify that it's been populated
         XCTAssertEqual(defaults.integer(forKey: "test-int"), 42)
         XCTAssertEqual(defaults.string(forKey: "test-string"), "I'm a String")
         validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 1, 2, 3, 4, 5 ])
         validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2) ])
         validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2) ])
+        XCTAssertNil(defaults.string(forKey: "test-nullable-string"))
 
         //Make Changes
         properties.intSample = 84
@@ -44,12 +48,14 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         properties.intArraySample += [ 100, 99, 98, 97, 96, 95 ]
         properties.intStructSample += [ SimpleStruct(name: "Hello", age: 8) ]
         properties.dictionarySample[11] = SimpleStruct(name: "Eleven", age: 11)
+        properties.nullableStringSample = "It's not nil no more"
         
         XCTAssertEqual(properties.intSample, 84)
         XCTAssertEqual(properties.stringSample, "Am I still a String?")
         XCTAssertEqual(properties.intArraySample, [ 1, 2, 3, 4, 5, 100, 99, 98, 97, 96, 95 ])
         XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2), SimpleStruct(name: "Hello", age: 8) ])
         XCTAssertEqual(properties.dictionarySample, [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2), 11: SimpleStruct(name: "Eleven", age: 11) ])
+        XCTAssertEqual(properties.nullableStringSample, "It's not nil no more")
         
         //Verify that it's been populated
         XCTAssertEqual(defaults.integer(forKey: "test-int"), 84)
@@ -57,6 +63,11 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 1, 2, 3, 4, 5, 100, 99, 98, 97, 96, 95 ])
         validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "one", age: 1), SimpleStruct(name: "two", age: 2), SimpleStruct(name: "Hello", age: 8) ])
         validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2), 11: SimpleStruct(name: "Eleven", age: 11) ])
+        XCTAssertEqual(defaults.string(forKey: "test-nullable-string"), "It's not nil no more")
+
+        // Clear it
+        properties.nullableStringSample = nil
+        XCTAssertNil(defaults.string(forKey: "test-nullable-string"))
     }
 
     func testPublishedAnnotation_fromPreviousValues() {
@@ -68,6 +79,7 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         defaults.set(try? JSONEncoder().encode([ 6, 7, 8, 9 ]), forKey: "test-int-array")
         defaults.set(try? JSONEncoder().encode([ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4) ]), forKey: "test-struct-array")
         defaults.set(try? JSONEncoder().encode([ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4) ]), forKey: "test-dictionary")
+        defaults.set("Not a nil String", forKey: "test-nullable-string")
 
         let properties = SimpleExample()
         XCTAssertEqual(properties.intSample, 99)
@@ -75,33 +87,38 @@ final class UserDefaultsExtensionsTests: XCTestCase {
         XCTAssertEqual(properties.intArraySample, [ 6, 7, 8, 9 ])
         XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4) ])
         XCTAssertEqual(properties.dictionarySample, [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4) ])
-        
+        XCTAssertEqual(properties.nullableStringSample, "Not a nil String")
+
         //Verify that it's been populated
         XCTAssertEqual(defaults.integer(forKey: "test-int"), 99)
         XCTAssertEqual(defaults.string(forKey: "test-string"), "Still a String")
         validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 6, 7, 8, 9 ])
         validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4) ])
         validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4) ])
-        
+        XCTAssertEqual(defaults.string(forKey: "test-nullable-string"), "Not a nil String")
+
         //Make Changes
         properties.intSample = 84
         properties.stringSample = "Am I still a String?"
         properties.intArraySample += [ 100, 99, 98, 97, 96, 95 ]
         properties.intStructSample += [ SimpleStruct(name: "Hello", age: 8) ]
         properties.dictionarySample[11] = SimpleStruct(name: "Eleven", age: 11)
-        
+        properties.nullableStringSample = nil
+
         XCTAssertEqual(properties.intSample, 84)
         XCTAssertEqual(properties.stringSample, "Am I still a String?")
         XCTAssertEqual(properties.intArraySample, [ 6, 7, 8, 9, 100, 99, 98, 97, 96, 95 ])
         XCTAssertEqual(properties.intStructSample, [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4), SimpleStruct(name: "Hello", age: 8) ])
         XCTAssertEqual(properties.dictionarySample, [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4), 11: SimpleStruct(name: "Eleven", age: 11) ])
-        
+        XCTAssertNil(properties.nullableStringSample
+        )
         //Verify that it's been populated
         XCTAssertEqual(defaults.integer(forKey: "test-int"), 84)
         XCTAssertEqual(defaults.string(forKey: "test-string"), "Am I still a String?")
         validateFromType(key: "test-int-array", ofType: Array<Int>.self, expectedValue: [ 6, 7, 8, 9, 100, 99, 98, 97, 96, 95 ])
         validateFromType(key: "test-struct-array", ofType: Array<SimpleStruct>.self, expectedValue: [ SimpleStruct(name: "three", age: 3), SimpleStruct(name: "four", age: 4), SimpleStruct(name: "Hello", age: 8) ])
         validateFromType(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self, expectedValue: [ 3: SimpleStruct(name: "three", age: 3), 4: SimpleStruct(name: "four", age: 4), 11: SimpleStruct(name: "Eleven", age: 11) ])
+        XCTAssertNil(defaults.string(forKey: "test-nullable-string"))
     }
 
     fileprivate func validateFromType<T>(key: String, ofType type: T.Type, expectedValue: T) where T: Codable & Equatable {
@@ -129,6 +146,9 @@ class SimpleExample: ObservableObject {
     
     @Published(key: "test-dictionary", ofType: Dictionary<Int, SimpleStruct>.self)
     var dictionarySample: [ Int: SimpleStruct ] = [ 1: SimpleStruct(name: "one", age: 1), 2: SimpleStruct(name: "two", age: 2) ]
+
+    @Published(key: "test-nullable-string", ofOptionalType: String.self)
+    var nullableStringSample: String? = nil
 }
 
 struct SimpleStruct: Codable, Equatable {
